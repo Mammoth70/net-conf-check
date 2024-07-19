@@ -1,9 +1,9 @@
-#!/usr/bin/python3 
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 '''
-Анализ структуры конфигурационного файла.
-Проверка объявления используемых объектов.
-Проверка использования объявленных объектов.
+Analysis of the structure of the network equipment configuration file.
+Checking the declaration of used objects.
+Checking the use of declared objects.
 
 '''
 import sys
@@ -14,47 +14,47 @@ import yaml
 import logging
 
 r_name = 'Shiva'
-r_fullname = '\n' + r_name + ' - система автоматизации администрирования телекоммуникационного оборудования\n'
+r_fullname = '\n' + r_name + ' - automation system for administration of telecommunication equipment\n'
 r_version = 'ver. 1.3.4  - 26.02.2024'
-r_copyright = 'Автор: Андрей Яковлев (andrey-yakovlev@yandex.ru) ' + r_version
-r_params = 'параметры командной строки'
+r_copyright = 'Author: Andrey Yakovlev (andrey-yakovlev@yandex.ru) ' + r_version
+r_params = 'command line options'
 r_help = 'help'
-r_help1 = 'вывод подсказки'
+r_help1 = 'help output'
 
 
 #DB =  {
-#'interface' : {                                 # Название объекта
-#    'declared' : [                              # список regexp-ов для поиска объявленных объектов
-#        r'^interface (?P<name>\S+)$'            
+#'interface' : {                                 # name of the property
+#    'declared' : [                              # list of regexps to search for declared objects
+#        r'^interface (?P<name>\S+)$'
 #        ]
-#    'declared_added' : ['default']              # Список объектов, которые нужно добавить к объявленным
-#    'used' : [                                  # список regexp-ов для поиска использованных объектов
+#    'declared_added' : ['default']              # list of objects to be added to declared ones
+#    'used' : [                                  # list of regexps to search for used objects
 #        r'[ -]interface (?P<name>\S+)$'
 #        ], 
-#    'check_unused' : False,                     # флаг проверки объявленных, но не использованных объектов
-#    'declared_used' : []                        # Список объектов, которые нужно добавить к использованным
+#    'check_unused' : False,                     # flag for checking declared but not used objects
+#    'declared_used' : []                        # list of objects to be added to used
 #}
 
 
-# Глобальные переменные
-lines = []      # Список строк конфигурационного файла, начальные и конечные пробелы обязательно сохраняются
-tree = {}       # Cловарь секций, где key - номер строки, а value - номер строки начала секции.
-location = {}   # Cловарь, где key - объект, а value - номер строки, где он встретился
+# # Global variables
+lines = []      # list of lines in the configuration file, leading and trailing spaces must be preserved
+tree = {}       # dictionary of sections of the configuration file, where key is the line number, and value is the line number of the beginning of the section
+location = {}   # dictionary, where key is an object and value is the line number where it occurs
 
 
 def exists_file(file_name):
     '''
-    Проверяет, есть ли такой файл.
+    Checks a file exists.
     '''
     return os.path.isfile(file_name)
 
 
 def load_from_file(input_file):
     '''
-    Загружает структуру из yaml файла и возвращает её.
+    Loads a structure from a yaml file and returns it.
     '''
     if not exists_file(input_file):
-        logging.error('Файл ' + input_file + ' не найден')
+        logging.error('File ' + input_file + ' not found')
         return None
     with open(input_file, 'r') as f:
         result = yaml.safe_load(f)
@@ -63,29 +63,29 @@ def load_from_file(input_file):
 
 def setup_logging():
     '''
-    Настраивает форматы и уровни логирования.
+    Configures logging formats and levels.
     '''
     logging.basicConfig(
-        format = 'Шива говорит --  %(levelname)s:  %(message)s',
+        format = 'Shiva says --  %(levelname)s:  %(message)s',
         level=logging.INFO)
     logging.getLogger('paramiko').setLevel(logging.WARNING)
 
 
 def print_full_name():
     '''
-    Выводит название системы.
+    Displays the system name.
     '''
     print(r_fullname, file=sys.stderr)
 
 
 def load_conf_from_text(input_file):
     '''
-    Загружает в список list конфигурацию из файла.
-    Делает словарь секций tree, где key - номер строки, а value - номер строки начала секции.
+    Loads the configuration from a file into the list.
+    Makes a dictionary of tree sections, where key is the line number, and value is the line number of the beginning of the section.
     '''
     global lines
     global tree
-   
+
     with open(input_file, 'r') as f:
         lines = [line.strip(('\n\r')) for line in f]
 
@@ -100,8 +100,8 @@ def load_conf_from_text(input_file):
 
 def load_obj(regex, debug=False):
     '''
-    Заполняет множество объявленных любых объектов из списка.
-    Делает словарь location, где key - объект, а value - номер строки, где он встретился.
+    Fills the set of declared any objects from the list.
+    Makes a location dictionary, where key is the object and value is the line number where it occurred.
     '''
     global lines
     global location
@@ -119,33 +119,33 @@ def load_obj(regex, debug=False):
 
 def print_check_objs_err(num, name, objname):
     '''
-    Выводит ошибку необъявленного объекта и текст, в котором она встретилась.
+    Displays the error of an undeclared object and the text in which it occurs.
     '''
     global lines
     global tree
     if tree[num] == num:
-        print('\n{0}\n   >>> не объявлен, но используется {2} \"{3}\" (строка {1}) <<<'.format(lines[num], num+1, objname, name))
+        print('\n{0}\n   >>> not declared, but used {2} \"{3}\" (line {1}) <<<'.format(lines[num], num+1, objname, name))
     elif tree[num] == (num-1):
-        print('\n{0}\n{1}\n   >>> не объявлен, но используется {3} \"{4}\" (строка {2}) <<<'.format(lines[tree[num]], lines[num], num+1, objname, name))
+        print('\n{0}\n{1}\n   >>> not declared, but used {3} \"{4}\" (line {2}) <<<'.format(lines[tree[num]], lines[num], num+1, objname, name))
     else:
-        print('\n{0}\n ...\n{1}\n   >>> не объявлен, но используется {3} \"{4}\" (строка {2}) <<<'.format(lines[tree[num]], lines[num], num+1, objname, name))
+        print('\n{0}\n ...\n{1}\n   >>> not declared, but used {3} \"{4}\" (line {2}) <<<'.format(lines[tree[num]], lines[num], num+1, objname, name))
     return None
 
 
 def print_check_objs_used_err(s, objname):
     '''
-    Выводит ошибку объявленного, но неиспользованного объекта.
+    Returns a declared but unused object error.
     '''
     global lines
     global location
     for obj in s:
-        print('\n{0}\n   >>> объявлен, но не используется {2} \"{3}\" (строка {1}) <<<'.format(lines[location[obj]], location[obj]+1, objname, obj))
+        print('\n{0}\n   >>> declared but not used {2} \"{3}\" (line {1}) <<<'.format(lines[location[obj]], location[obj]+1, objname, obj))
     return None
 
 
 def check_objs(regex, objs, objname, debug=False):
     '''
-    Проверяет строки c любыми объектами на наличие объекта.
+    Checks liness with any objects for the presence of an object.
     '''
     global lines
     objs_used = set()
@@ -163,7 +163,7 @@ def check_objs(regex, objs, objname, debug=False):
 
 def check_objs_used(objs, objs_used, objname):
     '''
-    Проверяет наличие объявленных, но не использованных объектов.
+    Checks for the presence of declared but not used objects.
     '''
     s = objs - objs_used
     if (len(s) > 0):
@@ -173,40 +173,40 @@ def check_objs_used(objs, objs_used, objname):
 
 def conf_run(args):
     if exists_file(args.source):
-        print('Проверка конфигурации из файла {}'.format(args.source))
+        print('Checking configuration from file {}'.format(args.source))
         load_conf_from_text(args.source)
 
         DB = load_from_file(args.database)
 
         for key in DB.keys():
-            # Загрузка описаний объектов
+            # Loading object descriptions
             objects = set()
             for regex in DB[key].get('declared', []):
                 objects = objects | load_obj(regex, DB[key].get('debug_load', False))
             for added in DB[key].get('declared_added', []):
                 objects.add(added)
 
-            # Проверка объявления использованных объектов
+            # Checking the declaration of used objects
             objects_used = set()
             for regex in DB[key].get('used', []):
                 objects_used = objects_used | check_objs(regex, objects, key, DB[key].get('debug_check', False))
             for added in DB[key].get('used_added', []):
                 objects_used.add(added)
 
-            # Проверка использования объявленых объектов
+            # Checking the use of declared objects
             if DB[key].get('check_unused', True):
                 check_objs_used(objects, objects_used, key)
     else:
-        print('\nФайл {} не найден'.format(args.source))
+        print('\nFile {} not found'.format(args.source))
 
     return None
 
 
 def create_parser():
     '''
-    Парсер командной строки.
+    Command line parser.
     '''
-    desprg = 'Скрипт анализирует правильность объявления и использования объектов конфигурационного файла.'
+    desprg = 'The script analyzes the correctness of the declaration and use of objects in the configuration file.'
     parser = argparse.ArgumentParser(prog = 'net-conf-check',
                                         description = desprg,
                                         add_help = False,
@@ -216,11 +216,11 @@ def create_parser():
     pr_group.add_argument('-d',
                           dest='database',
                           default='net-conf-check-cisco.yml',
-                          help='база данных объектов конфигурации')
+                          help='configuration object dictonary')
     pr_group.add_argument('-s',
                           dest='source',
                           required=True,
-                          help='конфигурационный файл')
+                          help='configuration file')
     pr_group.set_defaults(func=conf_run)
     return parser
 
