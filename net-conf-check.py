@@ -32,7 +32,7 @@ r_help1 = 'help output'
 #        r'[ -]interface (?P<name>\S+)$'
 #        ], 
 #    'check_unused' : False,                     # flag for checking declared but not used objects
-#    'declared_used' : []                        # list of objects to be added to used
+#    'used_added' : []                           # list of objects to be added to used
 #}
 
 
