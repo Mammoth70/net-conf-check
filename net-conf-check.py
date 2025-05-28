@@ -139,8 +139,10 @@ def print_check_objs_used_err(s, objname):
     global lines
     global location
     for obj in s:
-        if location[obj]:
+        if location.get(obj):
             print('\n{0}\n   >>> declared but not used {2} \"{3}\" (line {1}) <<<'.format(lines[location[obj]], location[obj]+1, objname, obj))
+        else:
+            print('\n{0}\n   >>> declared but not used {1} \"{2}\" <<<'.format('default declared', objname, obj))
     return None
 
 
