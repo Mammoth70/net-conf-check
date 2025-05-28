@@ -4,7 +4,7 @@
 
 [1]: https://img.shields.io/badge/python-3.6+-blue.svg?logo=python&logoColor=white
 [2]: https://www.python.org/downloads/
-[3]: https://img.shields.io/pypi/v/PyYAML.svg?logo=pypi&logoColor=white
+[3]: https://img.shields.io/pypi/v/PyYAML.svg?logo=pypi&logoColor=white&label=PyYAML
 [4]: https://pypi.python.org/pypi/PyYAML
 [5]: https://img.shields.io/github/license/Mammoth70/net-conf-check.svg
 [6]: LICENSE
