@@ -15,7 +15,7 @@ import logging
 
 r_name = 'Shiva'
 r_fullname = '\n' + r_name + ' - automation system for administration of telecommunication equipment\n'
-r_version = 'ver. 1.3.6  - 28.05.2025'
+r_version = 'ver. 1.3.7  - 17.06.2025'
 r_copyright = 'Author: Andrey Yakovlev (andrey-yakovlev@yandex.ru) ' + r_version
 r_params = 'command line options'
 r_help = 'help'
